@@ -1,5 +1,3 @@
-rootProject.name = 'mascotas-app'
-// include 'domain'
-// include 'application'
+rootProject.name = 'miztli-app'
 include 'titlanoni'
 include 'infrastructure'

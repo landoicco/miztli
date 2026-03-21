@@ -4,19 +4,15 @@ plugins {
     id 'io.spring.dependency-management'
 }
 
-// ESTO ES CLAVE PARA GRADLE 9 + SPRING BOOT
-// Deshabilitamos la creación del Jar ejecutable de Spring por ahora
 bootJar {
     enabled = false
 }
 
-// Habilitamos el Jar normal de Java
 jar {
     enabled = true
 }
 
 dependencies {
-    // plementation project(':application')
     implementation project(':titlanoni')
 
     implementation 'org.springframework.boot:spring-boot-starter'
