@@ -1,0 +1,5 @@
+rootProject.name = 'mascotas-app'
+// include 'domain'
+// include 'application'
+include 'titlanoni'
+include 'infrastructure'
