@@ -1,6 +1,7 @@
 package licaza.miztli.cloud;
 
 import software.amazon.awscdk.Stack;
+import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.services.dynamodb.*;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.lambda.Runtime;
@@ -25,9 +26,12 @@ public class MiztliStack extends Stack {
                 .handler("org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest")
                 // RUTA AL JAR DE TU OTRO PROYECTO
                 .code(Code.fromAsset("../miztli-lambda.jar"))
+                .memorySize(2048)
+                .timeout(Duration.seconds(30))
                 .environment(Map.of(
                     "TABLE_NAME", petsTable.getTableName(),
-                    "SPRING_CLOUD_FUNCTION_DEFINITION", "registerPet"
+                    "SPRING_CLOUD_FUNCTION_DEFINITION", "registerPet",
+                    "MAIN_CLASS", "licaza.miztli.infrastructure.MiztliApp"
                 ))
                 .build();
 
