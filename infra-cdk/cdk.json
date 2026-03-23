@@ -1,0 +1,23 @@
+{
+  "app": "./gradlew run",
+  "watch": {
+    "include": [
+      "**"
+    ],
+    "exclude": [
+      "README.md",
+      "cdk.context.json",
+      "build",
+      ".gradle"
+    ]
+  },
+  "context": {
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/core:stackRelativeExports": true,
+    "@aws-cdk/aws-iam:standardizedServicePrincipals": true,
+    "@aws-cdk/aws-lambda:adotLambdaLayerGenericExecutionRole": true,
+    "@aws-cdk/aws-lambda:runWithPolicy": true,
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}
