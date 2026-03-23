@@ -29,3 +29,7 @@ Then, if you make changes in code and want to deploy quickly to AWS, run the com
 cdk deploy --hotswap
 ```
 
+At the end, this is the infrastructure that you are working with so far: (created with `cdk-dia`)
+<img width="400" height="869" alt="diagram" src="https://github.com/user-attachments/assets/7f7d513d-1fd0-4223-b19d-2dd453362586" />
+
+
