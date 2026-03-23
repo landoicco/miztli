@@ -6,7 +6,7 @@ import licaza.miztli.domain.repository.PetRepository;
 
 public class RegisterPetUseCase {
 
-  private final PetRepository repository; // Inyectamos la interfaz
+  private final PetRepository repository;
 
   public RegisterPetUseCase(PetRepository repository) {
     this.repository = repository;

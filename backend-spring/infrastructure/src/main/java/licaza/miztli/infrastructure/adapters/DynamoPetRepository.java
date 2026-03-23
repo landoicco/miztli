@@ -10,17 +10,14 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 public class DynamoPetRepository implements PetRepository {
 
   private final DynamoDbClient dynamoDbClient;
-  // Esta variable vendrá de la configuración de AWS Lambda (CDK)
   private final String tableName = System.getenv("TABLE_NAME");
 
-  // Constructor manual para evitar el error de variable no inicializada
   public DynamoPetRepository(DynamoDbClient dynamoDbClient) {
     this.dynamoDbClient = dynamoDbClient;
   }
 
   @Override
   public void save(Pet pet) {
-    // Convertimos nuestro Record Pet a un mapa que DynamoDB entienda
     Map<String, AttributeValue> item =
         Map.of(
             "petId", AttributeValue.builder().s(pet.id()).build(),
@@ -30,7 +27,7 @@ public class DynamoPetRepository implements PetRepository {
 
     PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(item).build();
 
-    // Guardamos en la nube
+    // Push to the cloud!
     dynamoDbClient.putItem(request);
   }
 }
