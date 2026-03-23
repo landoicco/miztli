@@ -2,3 +2,4 @@
 **/build
 build
 **/cdk.out
+**.jar

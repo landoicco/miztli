@@ -24,7 +24,7 @@ public class MiztliStack extends Stack {
                 .runtime(Runtime.JAVA_17)
                 .handler("org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest")
                 // RUTA AL JAR DE TU OTRO PROYECTO
-                .code(Code.fromAsset("../backend-spring/build/libs/miztli-app.jar"))
+                .code(Code.fromAsset("../miztli-lambda.jar"))
                 .environment(Map.of(
                     "TABLE_NAME", petsTable.getTableName(),
                     "SPRING_CLOUD_FUNCTION_DEFINITION", "registerPet"
