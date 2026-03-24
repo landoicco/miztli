@@ -15,6 +15,9 @@ repositories {
 dependencies {
     implementation 'software.amazon.awscdk:aws-cdk-lib:2.110.0'
     implementation 'software.constructs:constructs:10.3.0'
+    // Módulos Alpha para HTTP API
+    implementation 'software.amazon.awscdk:apigatewayv2-alpha:2.114.0-alpha.0'
+    implementation 'software.amazon.awscdk:apigatewayv2-integrations-alpha:2.114.0-alpha.0'
 }
 
 subprojects {

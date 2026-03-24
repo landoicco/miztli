@@ -4,6 +4,8 @@ This is a basic learning-focused application designed to store essential informa
 
 It allows users to save and manage pet data—like name, age, breed, and medical details—into a DynamoDB table on AWS. Built primarily for educational purposes.
 
+The project is split in two Gradle projects. `backend-spring` is the code intended to be run on the AWS Lambda. `infra-cdk` is the code that will be "compiled" to a CloudFormation template.
+
 What about the name... Miztli? [Find out!](https://gdn.iib.unam.mx/diccionario/miztli/11008)
 
 ## How to deploy

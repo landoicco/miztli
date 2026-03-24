@@ -9,6 +9,7 @@ import licaza.miztli.infrastructure.entrypoints.PetRequest;
 import licaza.miztli.infrastructure.entrypoints.RegisterPetFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
@@ -30,7 +31,10 @@ public class BeanConfig {
   }
 
   @Bean
-  public Function<PetRequest, Pet> registerPet(RegisterPetUseCase useCase) {
-    return new RegisterPetFunction(useCase);
+  public Function<Message<PetRequest>, Pet> registerPet(RegisterPetUseCase useCase) {
+    return message -> {
+      PetRequest request = message.getPayload();
+      return new RegisterPetFunction(useCase).apply(message);
+    };
   }
 }

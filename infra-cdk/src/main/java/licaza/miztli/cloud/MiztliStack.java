@@ -5,13 +5,18 @@ import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.services.dynamodb.*;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.lambda.Runtime;
+import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.services.apigatewayv2.alpha.*;
+import software.amazon.awscdk.CfnOutput;
+import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.HttpLambdaIntegration;
 import software.amazon.awscdk.RemovalPolicy;
 import software.constructs.Construct;
 import java.util.Map;
+import java.util.List;
 
 public class MiztliStack extends Stack {
-    public MiztliStack(final Construct scope, final String id) {
-        super(scope, id);
+    public MiztliStack(final Construct scope, final String id, final StackProps props) {
+        super(scope, id, props);
 
         // Create DynamoDB table
         Table petsTable = Table.Builder.create(this, "PetsTable")
@@ -36,5 +41,19 @@ public class MiztliStack extends Stack {
 
         // Allow to write on table
         petsTable.grantWriteData(petsFunction);
+
+        // Define HttpGateway
+        HttpApi httpApi = HttpApi.Builder.create(this, "MiztliApi").build();
+
+        httpApi.addRoutes(AddRoutesOptions.builder()
+                .path("/{proxy+}")
+                .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.ANY))
+                .integration(HttpLambdaIntegration.Builder.create("PetFunctionIntegration", petsFunction).build())
+                .build());
+
+        // Output the URL
+        CfnOutput.Builder.create(this, "ApiEndpoint")
+            .value(httpApi.getApiEndpoint())
+            .build();
     }
 }
