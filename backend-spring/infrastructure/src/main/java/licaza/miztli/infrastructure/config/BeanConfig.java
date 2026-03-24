@@ -1,6 +1,8 @@
 package licaza.miztli.infrastructure.config;
 
+import java.util.Map;
 import java.util.function.Function;
+import licaza.miztli.app.usecase.GetPetByIdUseCase;
 import licaza.miztli.app.usecase.RegisterPetUseCase;
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
@@ -31,10 +33,30 @@ public class BeanConfig {
   }
 
   @Bean
+  public GetPetByIdUseCase getPetByIdUseCase(PetRepository repository) {
+    return new GetPetByIdUseCase(repository);
+  }
+
+  @Bean
   public Function<Message<PetRequest>, Pet> registerPet(RegisterPetUseCase useCase) {
     return message -> {
       PetRequest request = message.getPayload();
       return new RegisterPetFunction(useCase).apply(message);
+    };
+  }
+
+  @Bean
+  public Function<Map<String, Object>, Pet> getPetById(GetPetByIdUseCase useCase) {
+    return message -> {
+      Map<String, String> pathParams = (Map<String, String>) message.get("pathParameters");
+
+      if (pathParams == null || !pathParams.containsKey("id")) {
+        throw new IllegalArgumentException("ID is required!");
+      }
+
+      String id = pathParams.get("id");
+
+      return useCase.execute(id);
     };
   }
 }

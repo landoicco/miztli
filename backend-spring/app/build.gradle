@@ -4,4 +4,7 @@ plugins {
 
 dependencies {
     implementation project(':domain')
+    implementation platform('org.springframework.boot:spring-boot-dependencies:3.2.0')
+
+    implementation 'org.springframework:spring-context'
 }

@@ -18,15 +18,21 @@ public class MiztliStack extends Stack {
     public MiztliStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
 
-        // Create DynamoDB table
+        /* Create PetsTable on Dynamo */
         Table petsTable = Table.Builder.create(this, "PetsTable")
                 .partitionKey(Attribute.builder().name("petId").type(AttributeType.STRING).build())
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .removalPolicy(RemovalPolicy.DESTROY)
                 .build();
 
-        // Create Spring Lambda
-        Function petsFunction = Function.Builder.create(this, "RegisterPetFunction")
+        /* Define ApiGateway */
+        HttpApi httpApi = HttpApi.Builder.create(this, "MiztliApi").build();
+
+
+        /* Support POST */
+
+        // Lambda
+        Function postFunction = Function.Builder.create(this, "RegisterPetFunction")
                 .runtime(Runtime.JAVA_17)
                 .handler("org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest")
                 .code(Code.fromAsset("../miztli-lambda.jar"))
@@ -35,23 +41,51 @@ public class MiztliStack extends Stack {
                 .environment(Map.of(
                     "TABLE_NAME", petsTable.getTableName(),
                     "SPRING_CLOUD_FUNCTION_DEFINITION", "registerPet",
+                    "SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING", "true",
                     "MAIN_CLASS", "licaza.miztli.infrastructure.MiztliApp"
                 ))
                 .build();
 
-        // Allow to write on table
-        petsTable.grantWriteData(petsFunction);
+        HttpLambdaIntegration postLambdaIntegration = HttpLambdaIntegration.Builder.create("PostFunctionIntegration", postFunction).build();
 
-        // Define HttpGateway
-        HttpApi httpApi = HttpApi.Builder.create(this, "MiztliApi").build();
+        // Allow to write on table
+        petsTable.grantWriteData(postFunction);
 
         httpApi.addRoutes(AddRoutesOptions.builder()
-                .path("/{proxy+}")
-                .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.ANY))
-                .integration(HttpLambdaIntegration.Builder.create("PetFunctionIntegration", petsFunction).build())
-                .build());
+                          .path("/pet/add")
+                          .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.POST))
+                          .integration(postLambdaIntegration)
+                          .build());
 
-        // Output the URL
+        /* Support GET */
+
+        // Lambda
+        Function getByIdFunction = Function.Builder.create(this, "GetPetByIdFunction")
+            .runtime(Runtime.JAVA_17)
+            .handler("org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest")
+            .code(Code.fromAsset("../miztli-lambda.jar"))
+            .memorySize(2048)
+            .timeout(Duration.seconds(30))
+            .environment(Map.of(
+                                "TABLE_NAME", petsTable.getTableName(),
+                                "SPRING_CLOUD_FUNCTION_DEFINITION", "getPetById",
+                                "SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING", "true",
+                                "MAIN_CLASS", "licaza.miztli.infrastructure.MiztliApp"
+                                ))
+            .build();
+
+        HttpLambdaIntegration getByIdLambdaIntegration = HttpLambdaIntegration.Builder.create("GetPetByIdFunctionIntegration", getByIdFunction).build();
+
+        petsTable.grantReadData(getByIdFunction);
+
+        // By petId
+        httpApi.addRoutes(AddRoutesOptions.builder()
+                          .path("/pet/{id}")
+                          .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.GET))
+                          .integration(getByIdLambdaIntegration)
+                          .build());
+
+        /* Output the URL */
         CfnOutput.Builder.create(this, "ApiEndpoint")
             .value(httpApi.getApiEndpoint())
             .build();

@@ -15,7 +15,7 @@ public class RegisterPetUseCase {
   public Pet execute(String name, String type, int age) {
     String normalizedType = type.trim().toUpperCase();
 
-    String id = UUID.randomUUID().toString();
+    String id = "pet-" + UUID.randomUUID().toString();
 
     Pet newPet = new Pet(id, name, type.toUpperCase(), age);
 
