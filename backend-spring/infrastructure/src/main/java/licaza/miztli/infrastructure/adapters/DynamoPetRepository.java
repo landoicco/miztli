@@ -2,6 +2,8 @@ package licaza.miztli.infrastructure.adapters;
 
 import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
 import org.springframework.stereotype.Repository;
@@ -30,19 +32,19 @@ public class DynamoPetRepository implements PetRepository {
     return petTable.getItem(key);
   }
 
-  // public List<Pet> getAll() {
-  //   try {
-  //     return petTable.scan().items().stream().collect(Collectors.toList());
-  //   } catch (Exception e) {
-  //     throw new RuntimeException("Error al leer mascotas de DynamoDB", e);
-  //   }
-  // }
+  public List<Pet> findAll() {
+    try {
+      return petTable.scan().items().stream().collect(Collectors.toList());
+    } catch (Exception e) {
+      throw new RuntimeException("Error at finding all pets on DynamoDB", e);
+    }
+  }
 
-  // public void delete(String id) {
-  //   Key key = Key.builder().partitionValue(id).build();
+  public void delete(String id) {
+    Key key = Key.builder().partitionValue(id).build();
 
-  //   petTable.deleteItem(key);
-  // }
+    petTable.deleteItem(key);
+  }
 
   // Define the Schema for our Pet POJO
   private static final TableSchema<Pet> PET_SCHEMA =

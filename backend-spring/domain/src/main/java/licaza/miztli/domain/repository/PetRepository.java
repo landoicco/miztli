@@ -1,5 +1,6 @@
 package licaza.miztli.domain.repository;
 
+import java.util.List;
 import licaza.miztli.domain.model.Pet;
 
 public interface PetRepository {
@@ -7,5 +8,7 @@ public interface PetRepository {
 
   Pet findById(String id);
 
-  // List<Pet> findAll();
+  List<Pet> findAll();
+
+  void delete(String id);
 }

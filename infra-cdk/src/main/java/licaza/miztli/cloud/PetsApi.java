@@ -79,5 +79,34 @@ public class PetsApi extends Construct {
                           .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.GET))
                           .integration(getByIdLambdaIntegration)
                           .build());
+
+        // All pets
+
+        // Lambda
+        Function getAllPetsFunction = Function.Builder.create(this, "GetAllPetsFunction")
+            .runtime(Runtime.JAVA_17)
+            .handler("org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest")
+            .code(lambdaCode)
+            .memorySize(2048)
+            .timeout(Duration.seconds(30))
+            .environment(Map.of(
+                                "TABLE_NAME", table.getTableName(),
+                                "SPRING_CLOUD_FUNCTION_DEFINITION", "findAll",
+                                "SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING", "true",
+                                "MAIN_CLASS", "licaza.miztli.infrastructure.MiztliApp"
+                                ))
+            .build();
+
+        HttpLambdaIntegration getAllPetsLambdaIntegration = HttpLambdaIntegration.Builder.create("GetAllPetsFunctionIntegration", getAllPetsFunction).build();
+
+        table.grantReadData(getAllPetsFunction);
+
+
+        httpApi.addRoutes(AddRoutesOptions.builder()
+                          .path("/pets")
+                          .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.GET))
+                          .integration(getAllPetsLambdaIntegration)
+                          .build());
         }
-    }
+
+        }

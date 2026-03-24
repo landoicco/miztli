@@ -1,7 +1,10 @@
 package licaza.miztli.infrastructure.config;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import licaza.miztli.app.usecase.GetAllPetsUseCase;
 import licaza.miztli.app.usecase.GetPetByIdUseCase;
 import licaza.miztli.app.usecase.RegisterPetUseCase;
 import licaza.miztli.domain.model.Pet;
@@ -38,6 +41,11 @@ public class BeanConfig {
   }
 
   @Bean
+  public GetAllPetsUseCase getAllPetsUseCase(PetRepository repository) {
+    return new GetAllPetsUseCase(repository);
+  }
+
+  @Bean
   public Function<Message<PetRequest>, Pet> registerPet(RegisterPetUseCase useCase) {
     return message -> {
       PetRequest request = message.getPayload();
@@ -58,5 +66,10 @@ public class BeanConfig {
 
       return useCase.execute(id);
     };
+  }
+
+  @Bean
+  public Supplier<List<Pet>> findAll(GetAllPetsUseCase useCase) {
+    return () -> useCase.execute();
   }
 }
