@@ -1,57 +1,65 @@
 package licaza.miztli.infrastructure.adapters;
 
-import java.util.Map;
-import java.util.Optional;
+import static software.amazon.awssdk.enhanced.dynamodb.mapper.StaticAttributeTags.primaryPartitionKey;
+
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
-import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
-import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import org.springframework.stereotype.Repository;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
+@Repository
 public class DynamoPetRepository implements PetRepository {
 
-  private final DynamoDbClient dynamoDbClient;
+  private final DynamoDbTable<Pet> petTable;
   private final String tableName = System.getenv("TABLE_NAME");
 
-  public DynamoPetRepository(DynamoDbClient dynamoDbClient) {
-    this.dynamoDbClient = dynamoDbClient;
+  public DynamoPetRepository(DynamoDbEnhancedClient enhancedClient) {
+    this.petTable = enhancedClient.table(tableName, PET_SCHEMA);
   }
 
-  @Override
   public void save(Pet pet) {
-    Map<String, AttributeValue> item =
-        Map.of(
-            "petId", AttributeValue.builder().s(pet.id()).build(),
-            "name", AttributeValue.builder().s(pet.name()).build(),
-            "type", AttributeValue.builder().s(pet.type()).build(),
-            "age", AttributeValue.builder().n(String.valueOf(pet.age())).build());
-
-    PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(item).build();
-
-    // Push to the cloud!
-    dynamoDbClient.putItem(request);
+    petTable.putItem(pet);
   }
 
-  @Override
-  public Optional<Pet> findById(String id) {
-    Map<String, AttributeValue> key = Map.of("petId", AttributeValue.builder().s(id).build());
-    GetItemRequest request =
-        GetItemRequest.builder().tableName(System.getenv("TABLE_NAME")).key(key).build();
-    GetItemResponse response = dynamoDbClient.getItem(request);
+  public Pet findById(String id) {
+    Key key = Key.builder().partitionValue(id).build();
 
-    if (!response.hasItem() || response.item().isEmpty()) {
-      return Optional.empty();
-    }
-
-    String petId = response.item().get("petId").s(),
-        name = response.item().get("name").s(),
-        type = response.item().get("type").s();
-
-    int age = Integer.parseInt(response.item().get("age").n());
-
-    Pet pet = new Pet(petId, name, type, age);
-    return Optional.of(pet);
+    return petTable.getItem(key);
   }
+
+  // public List<Pet> getAll() {
+  //   try {
+  //     return petTable.scan().items().stream().collect(Collectors.toList());
+  //   } catch (Exception e) {
+  //     throw new RuntimeException("Error al leer mascotas de DynamoDB", e);
+  //   }
+  // }
+
+  // public void delete(String id) {
+  //   Key key = Key.builder().partitionValue(id).build();
+
+  //   petTable.deleteItem(key);
+  // }
+
+  // Define the Schema for our Pet POJO
+  private static final TableSchema<Pet> PET_SCHEMA =
+      TableSchema.builder(Pet.class, Pet.Builder.class)
+          .newItemBuilder(Pet::builder, Pet.Builder::build)
+          .addAttribute(
+              String.class,
+              a ->
+                  a.name("petId")
+                      .getter(Pet::getPetId)
+                      .setter(Pet.Builder::petId)
+                      .tags(primaryPartitionKey()))
+          .addAttribute(
+              String.class, a -> a.name("name").getter(Pet::getName).setter(Pet.Builder::name))
+          .addAttribute(
+              String.class, a -> a.name("type").getter(Pet::getType).setter(Pet.Builder::type))
+          .addAttribute(
+              Integer.class, a -> a.name("age").getter(Pet::getAge).setter(Pet.Builder::age))
+          .build();
 }

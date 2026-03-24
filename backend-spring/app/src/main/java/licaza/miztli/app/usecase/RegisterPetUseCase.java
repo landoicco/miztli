@@ -17,7 +17,7 @@ public class RegisterPetUseCase {
 
     String id = "pet-" + UUID.randomUUID().toString();
 
-    Pet newPet = new Pet(id, name, type.toUpperCase(), age);
+    Pet newPet = Pet.builder().petId(id).name(name).type(type).age(age).build();
 
     repository.save(newPet);
 

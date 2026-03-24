@@ -14,8 +14,6 @@ public class GetPetByIdUseCase {
   }
 
   public Pet execute(String id) {
-    return repository
-        .findById(id)
-        .orElseThrow(() -> new RuntimeException("No pet found with ID: " + id));
+    return repository.findById(id);
   }
 }

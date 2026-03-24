@@ -6,12 +6,12 @@ import licaza.miztli.app.usecase.GetPetByIdUseCase;
 import licaza.miztli.app.usecase.RegisterPetUseCase;
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
-import licaza.miztli.infrastructure.adapters.DynamoPetRepository;
 import licaza.miztli.infrastructure.entrypoints.PetRequest;
 import licaza.miztli.infrastructure.entrypoints.RegisterPetFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
@@ -23,8 +23,8 @@ public class BeanConfig {
   }
 
   @Bean
-  public PetRepository petRepository(DynamoDbClient client) {
-    return new DynamoPetRepository(client);
+  public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
+    return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
   }
 
   @Bean
