@@ -2,11 +2,8 @@ package licaza.miztli.infrastructure.config;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import licaza.miztli.app.usecase.GetAllPetsUseCase;
-import licaza.miztli.app.usecase.GetPetByIdUseCase;
-import licaza.miztli.app.usecase.RegisterPetUseCase;
+import java.util.function.*;
+import licaza.miztli.app.usecase.*;
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
 import licaza.miztli.infrastructure.entrypoints.PetRequest;
@@ -41,6 +38,11 @@ public class BeanConfig {
   }
 
   @Bean
+  public DeletePetByIdUseCase deletePetByIdUseCase(PetRepository repository) {
+    return new DeletePetByIdUseCase(repository);
+  }
+
+  @Bean
   public GetAllPetsUseCase getAllPetsUseCase(PetRepository repository) {
     return new GetAllPetsUseCase(repository);
   }
@@ -71,5 +73,20 @@ public class BeanConfig {
   @Bean
   public Supplier<List<Pet>> findAll(GetAllPetsUseCase useCase) {
     return () -> useCase.execute();
+  }
+
+  @Bean
+  public Function<Map<String, Object>, String> deletePetById(DeletePetByIdUseCase useCase) {
+    return message -> {
+      Map<String, String> pathParams = (Map<String, String>) message.get("pathParameters");
+
+      if (pathParams == null || !pathParams.containsKey("id")) {
+        throw new IllegalArgumentException("ID is required!");
+      }
+
+      String id = pathParams.get("id");
+      useCase.execute(id);
+      return "Pet with ID " + id + " correctly deleted!";
+    };
   }
 }
