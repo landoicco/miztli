@@ -1,4 +1,4 @@
-package licaza.miztli.cloud;
+package licaza.miztli.iac.aws;
 
 import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.StackProps;
