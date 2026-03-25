@@ -1,19 +1,62 @@
 package licaza.miztli.domain.model;
 
-import java.util.Objects;
+public class Pet {
+  private final String petId, name, type;
+  private final int age;
 
-/** Record that represent a basic "Pet" entity on the system */
-public record Pet(String id, String name, String type, int age) {
+  private Pet(Builder builder) {
+    this.petId = builder.petId;
+    this.name = builder.name;
+    this.type = builder.type;
+    this.age = builder.age;
+  }
 
-  public Pet {
-    Objects.requireNonNull(name, "Name can not be null!");
-    if (name.isBlank()) {
-      throw new IllegalArgumentException("Name can not be empty!");
+  public String getPetId() {
+    return petId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public int getAge() {
+    return age;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private String petId, name, type;
+    private int age;
+
+    public Builder petId(String petId) {
+      this.petId = petId;
+      return this;
     }
 
-    String upperType = type.toUpperCase();
-    if (!upperType.equals("DOG") && !upperType.equals("CAT")) {
-      throw new IllegalArgumentException("At the moment, we only support: DOG or CAT");
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder type(String type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder age(int age) {
+      this.age = age;
+      return this;
+    }
+
+    public Pet build() {
+      return new Pet(this);
     }
   }
 }

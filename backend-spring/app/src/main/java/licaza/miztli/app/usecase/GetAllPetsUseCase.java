@@ -1,19 +1,20 @@
 package licaza.miztli.app.usecase;
 
+import java.util.List;
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GetPetByIdUseCase {
+public class GetAllPetsUseCase {
 
   private final PetRepository repository;
 
-  public GetPetByIdUseCase(PetRepository repository) {
+  public GetAllPetsUseCase(PetRepository repository) {
     this.repository = repository;
   }
 
-  public Pet execute(String id) {
-    return repository.findById(id);
+  public List<Pet> execute() {
+    return repository.findAll();
   }
 }

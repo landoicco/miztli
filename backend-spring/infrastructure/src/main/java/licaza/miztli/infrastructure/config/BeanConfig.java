@@ -1,17 +1,17 @@
 package licaza.miztli.infrastructure.config;
 
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import licaza.miztli.app.usecase.GetPetByIdUseCase;
-import licaza.miztli.app.usecase.RegisterPetUseCase;
+import java.util.function.*;
+import licaza.miztli.app.usecase.*;
 import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
-import licaza.miztli.infrastructure.adapters.DynamoPetRepository;
 import licaza.miztli.infrastructure.entrypoints.PetRequest;
 import licaza.miztli.infrastructure.entrypoints.RegisterPetFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
@@ -23,8 +23,8 @@ public class BeanConfig {
   }
 
   @Bean
-  public PetRepository petRepository(DynamoDbClient client) {
-    return new DynamoPetRepository(client);
+  public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
+    return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
   }
 
   @Bean
@@ -35,6 +35,16 @@ public class BeanConfig {
   @Bean
   public GetPetByIdUseCase getPetByIdUseCase(PetRepository repository) {
     return new GetPetByIdUseCase(repository);
+  }
+
+  @Bean
+  public DeletePetByIdUseCase deletePetByIdUseCase(PetRepository repository) {
+    return new DeletePetByIdUseCase(repository);
+  }
+
+  @Bean
+  public GetAllPetsUseCase getAllPetsUseCase(PetRepository repository) {
+    return new GetAllPetsUseCase(repository);
   }
 
   @Bean
@@ -57,6 +67,26 @@ public class BeanConfig {
       String id = pathParams.get("id");
 
       return useCase.execute(id);
+    };
+  }
+
+  @Bean
+  public Supplier<List<Pet>> findAll(GetAllPetsUseCase useCase) {
+    return () -> useCase.execute();
+  }
+
+  @Bean
+  public Function<Map<String, Object>, String> deletePetById(DeletePetByIdUseCase useCase) {
+    return message -> {
+      Map<String, String> pathParams = (Map<String, String>) message.get("pathParameters");
+
+      if (pathParams == null || !pathParams.containsKey("id")) {
+        throw new IllegalArgumentException("ID is required!");
+      }
+
+      String id = pathParams.get("id");
+      useCase.execute(id);
+      return "Pet with ID " + id + " correctly deleted!";
     };
   }
 }

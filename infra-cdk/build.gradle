@@ -5,7 +5,7 @@ plugins {
     id "com.diffplug.spotless" version "6.25.0"
 }
 
-group = 'licaza.miztli.cloud'
+group = 'licaza.miztli.iac.aws'
 version = '1.0.0'
 
 repositories {
@@ -33,5 +33,5 @@ subprojects {
 }
 
 application {
-    mainClass = 'licaza.miztli.cloud.CdkApp'
+    mainClass = 'licaza.miztli.iac.aws.CdkApp'
 }

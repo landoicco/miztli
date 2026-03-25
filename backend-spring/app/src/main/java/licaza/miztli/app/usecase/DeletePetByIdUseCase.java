@@ -1,19 +1,18 @@
 package licaza.miztli.app.usecase;
 
-import licaza.miztli.domain.model.Pet;
 import licaza.miztli.domain.repository.PetRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GetPetByIdUseCase {
+public class DeletePetByIdUseCase {
 
   private final PetRepository repository;
 
-  public GetPetByIdUseCase(PetRepository repository) {
+  public DeletePetByIdUseCase(PetRepository repository) {
     this.repository = repository;
   }
 
-  public Pet execute(String id) {
-    return repository.findById(id);
+  public void execute(String id) {
+    repository.delete(id);
   }
 }

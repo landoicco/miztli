@@ -1,12 +1,14 @@
 package licaza.miztli.domain.repository;
 
-import java.util.Optional;
+import java.util.List;
 import licaza.miztli.domain.model.Pet;
 
 public interface PetRepository {
   void save(Pet pet);
 
-  Optional<Pet> findById(String id);
+  Pet findById(String id);
 
-  // List<Pet> findAll();
+  List<Pet> findAll();
+
+  void delete(String id);
 }
