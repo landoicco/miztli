@@ -18,6 +18,8 @@ public class MiztliStack extends Stack {
     public MiztliStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
 
+        Code lambdaCode = Code.fromAsset("../miztli-lambda.jar");
+
         /* Create PetsTable on Dynamo */
         Table petsTable = Table.Builder.create(this, "PetsTable")
                 .partitionKey(Attribute.builder().name("petId").type(AttributeType.STRING).build())
@@ -25,6 +27,7 @@ public class MiztliStack extends Stack {
                 .removalPolicy(RemovalPolicy.DESTROY)
                 .build();
 
-        new PetsApi(this, "PetsRestApi", petsTable);
+        new PetImagesStorage(this, "PetImagesStorage", petsTable, lambdaCode);
+        new PetsApi(this, "PetsRestApi", petsTable, lambdaCode);
     }
 }
