@@ -32,6 +32,8 @@ cdk deploy --hotswap
 ```
 
 At the end, this is the infrastructure that you are working with so far: (created with `cdk-dia`)
-<img width="400" height="869" alt="diagram" src="https://github.com/user-attachments/assets/7f7d513d-1fd0-4223-b19d-2dd453362586" />
+
+<img width="2514" height="1986" alt="diagram" src="https://github.com/user-attachments/assets/0ff86a75-c4f2-4ae0-9cd5-884463de0346" />
+
 
 
