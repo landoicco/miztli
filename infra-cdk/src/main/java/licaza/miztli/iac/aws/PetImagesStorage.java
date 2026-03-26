@@ -21,7 +21,7 @@ public class PetImagesStorage extends Construct {
         Bucket bucket = Bucket.Builder.create(this, "PetImagesBucket")
                 .versioned(false)
                 .publicReadAccess(true)
-                .removalPolicy(RemovalPolicy.DESTROY)
+                .removalPolicy(RemovalPolicy.DESTROY) // For dev only...
                 .blockPublicAccess(BlockPublicAccess.BLOCK_ACLS)
                 .autoDeleteObjects(true)
                 .build();

@@ -21,7 +21,7 @@ public class PetImageS3StorageRepository implements StorageRepository {
     s3Client.putObject(
         PutObjectRequest.builder()
             .bucket(bucketName)
-            .key("photos/" + fileName)
+            .key(fileName)
             .contentType("image/jpeg")
             .build(),
         RequestBody.fromBytes(content));
