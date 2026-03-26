@@ -20,14 +20,10 @@ public class MiztliStack extends Stack {
 
         Code lambdaCode = Code.fromAsset("../miztli-lambda.jar");
 
-        /* Create PetsTable on Dynamo */
-        Table petsTable = Table.Builder.create(this, "PetsTable")
-                .partitionKey(Attribute.builder().name("petId").type(AttributeType.STRING).build())
-                .billingMode(BillingMode.PAY_PER_REQUEST)
-                .removalPolicy(RemovalPolicy.DESTROY)
-                .build();
+        /* Define ApiGateway */
+        HttpApi httpApi = HttpApi.Builder.create(this, "MiztliApi").build();
 
-        new PetImagesStorage(this, "PetImagesStorage", petsTable, lambdaCode);
-        new PetsApi(this, "PetsRestApi", petsTable, lambdaCode);
+        new PetImagesStorage(this, "PetImagesStorage", httpApi, lambdaCode);
+        new PetsApi(this, "PetDataPersistance", httpApi, lambdaCode);
     }
 }

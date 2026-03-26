@@ -5,14 +5,16 @@ import java.util.Map;
 import java.util.function.*;
 import licaza.miztli.app.usecase.*;
 import licaza.miztli.domain.model.Pet;
-import licaza.miztli.domain.repository.PetRepository;
-import licaza.miztli.infrastructure.entrypoints.PetRequest;
-import licaza.miztli.infrastructure.entrypoints.RegisterPetFunction;
+import licaza.miztli.domain.repository.*;
+import licaza.miztli.infrastructure.adapters.PetImageS3StorageRepository;
+import licaza.miztli.infrastructure.entrypoints.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class BeanConfig {
@@ -25,6 +27,16 @@ public class BeanConfig {
   @Bean
   public DynamoDbEnhancedClient dynamoDbEnhancedClient(DynamoDbClient dynamoDbClient) {
     return DynamoDbEnhancedClient.builder().dynamoDbClient(dynamoDbClient).build();
+  }
+
+  @Bean
+  public S3Client s3Client() {
+    return S3Client.builder().region(Region.US_EAST_1).build();
+  }
+
+  @Bean
+  public StorageRepository storageRepository(S3Client s3Client) {
+    return new PetImageS3StorageRepository(s3Client);
   }
 
   @Bean
@@ -45,6 +57,20 @@ public class BeanConfig {
   @Bean
   public GetAllPetsUseCase getAllPetsUseCase(PetRepository repository) {
     return new GetAllPetsUseCase(repository);
+  }
+
+  @Bean
+  public UploadPetImagesUseCase uploadPetImageUseCase(StorageRepository storageRepository) {
+    return new UploadPetImagesUseCase(storageRepository);
+  }
+
+  @Bean
+  public Function<Message<PetImageRequest>, List<String>> uploadPetImages(
+      UploadPetImagesUseCase useCase) {
+    return message -> {
+      PetImageRequest request = message.getPayload();
+      return new UploadPetImageFunction(useCase).apply(message);
+    };
   }
 
   @Bean

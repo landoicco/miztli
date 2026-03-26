@@ -6,19 +6,22 @@ import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.dynamodb.*;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.RemovalPolicy;
+import software.amazon.awscdk.services.apigatewayv2.alpha.*;
+import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.HttpLambdaIntegration;
 import software.constructs.Construct;
 import java.util.Map;
+import java.util.List;
 import software.amazon.awscdk.Duration;
 
 public class PetImagesStorage extends Construct {
-    public PetImagesStorage(Construct scope, String id, Table table, Code lambdaCode) {
+    public PetImagesStorage(Construct scope, String id, HttpApi httpApi, Code lambdaCode) {
         super(scope, id);
 
         /* Pet images bucket on S3 */
         Bucket bucket = Bucket.Builder.create(this, "PetImagesBucket")
-                .versioned(false) // Opcional: mantener versiones de fotos
-                .publicReadAccess(true) // Importante para que las URLs funcionen en el frontend
-                .removalPolicy(RemovalPolicy.DESTROY) // Solo para desarrollo (borra el bucket al destruir el stack)
+                .versioned(false)
+                .publicReadAccess(true)
+                .removalPolicy(RemovalPolicy.DESTROY)
                 .blockPublicAccess(BlockPublicAccess.BLOCK_ACLS)
                 .autoDeleteObjects(true)
                 .build();
@@ -31,19 +34,23 @@ public class PetImagesStorage extends Construct {
             .runtime(Runtime.JAVA_17)
             .handler("org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest")
             .code(lambdaCode)
-            .timeout(Duration.seconds(30)) // Subir fotos toma tiempo
-            .memorySize(2048) // Importante: Procesar Base64 requiere RAM
+            .timeout(Duration.seconds(30))
+            .memorySize(2048)
             .environment(Map.of(
-                                // ESTA ES LA CLAVE: El nombre del @Bean en tu BeanConfig
-                                "SPRING_CLOUD_FUNCTION_DEFINITION", "savePetImage",
+                                "SPRING_CLOUD_FUNCTION_DEFINITION", "uploadPetImages",
                                 "BUCKET_NAME", bucket.getBucketName(),
                                 "SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING", "true",
                                 "MAIN_CLASS", "licaza.miztli.infrastructure.MiztliApp"
                                 ))
             .build();
 
-        // 2. DAR PERMISOS (Sin esto fallará el UseCase)
-        table.grantWriteData(savePetImageFunction);      // Para el repo de Dynamo
-        bucket.grantWrite(savePetImageFunction);   // Para el repo de S3
+        bucket.grantWrite(savePetImageFunction);
+        HttpLambdaIntegration StoreInS3LambdaIntegration = HttpLambdaIntegration.Builder.create("SavePetImageFunctionLambdaIntegration", savePetImageFunction).build();
+
+         httpApi.addRoutes(AddRoutesOptions.builder()
+                          .path("/pet/add/img/{id}")
+                          .methods(List.of(software.amazon.awscdk.services.apigatewayv2.alpha.HttpMethod.POST))
+                          .integration(StoreInS3LambdaIntegration)
+                          .build());
     }
 }

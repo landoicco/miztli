@@ -16,11 +16,16 @@ import java.util.List;
 
 public class PetsApi extends Construct {
 
-    public PetsApi(Construct scope, String id, Table table, Code lambdaCode) {
+    public PetsApi(Construct scope, String id, HttpApi httpApi, Code lambdaCode) {
         super(scope, id);
 
-         /* Define ApiGateway */
-        HttpApi httpApi = HttpApi.Builder.create(this, "MiztliApi").build();
+
+        /* Create PetsTable on Dynamo */
+        Table table = Table.Builder.create(this, "PetsTable")
+                .partitionKey(Attribute.builder().name("petId").type(AttributeType.STRING).build())
+                .billingMode(BillingMode.PAY_PER_REQUEST)
+                .removalPolicy(RemovalPolicy.DESTROY)
+                .build();
 
         /* Support POST */
 
