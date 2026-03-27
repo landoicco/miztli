@@ -18,13 +18,12 @@ public class MiztliStack extends Stack {
     public MiztliStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
 
-        /* Create PetsTable on Dynamo */
-        Table petsTable = Table.Builder.create(this, "PetsTable")
-                .partitionKey(Attribute.builder().name("petId").type(AttributeType.STRING).build())
-                .billingMode(BillingMode.PAY_PER_REQUEST)
-                .removalPolicy(RemovalPolicy.DESTROY)
-                .build();
+        Code lambdaCode = Code.fromAsset("../miztli-lambda.jar");
 
-        new PetsApi(this, "PetsRestApi", petsTable);
+        /* Define ApiGateway */
+        HttpApi httpApi = HttpApi.Builder.create(this, "MiztliApi").build();
+
+        new PetImagesStorage(this, "PetImagesStorage", httpApi, lambdaCode);
+        new PetsApi(this, "PetDataPersistance", httpApi, lambdaCode);
     }
 }
